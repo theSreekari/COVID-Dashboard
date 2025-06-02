@@ -61,7 +61,7 @@ st.dataframe(top_10)
 
 # Tabs for visualizations
 st.subheader("📊 Visualizations")
-tabs = st.tabs(["📈 Plotly", "📊 Seaborn", "🖼️ Matplotlib", "🔥 Heatmap"])
+tabs = st.tabs(["📈 Plotly", "📊 Seaborn", "🖼️ Matplotlib"])
 
 # Plotly
 with tabs[0]:
