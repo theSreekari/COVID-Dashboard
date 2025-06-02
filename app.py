@@ -104,12 +104,17 @@ with tabs[4]:
 with tabs[5]:
     st.write("### ☁️ WordCloud: Total Cases by Country Name Size")
     word_data = latest[latest['location'].isin(countries)]
-    text_data = {row['location']: row['total_cases'] for _, row in word_data.iterrows()}
-    wc = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(text_data)
-    fig, ax = plt.subplots()
-    ax.imshow(wc, interpolation='bilinear')
-    ax.axis('off')
-    st.pyplot(fig)
+    text_data = {row['location']: row['total_cases'] for _, row in word_data.iterrows() if pd.notna(row['total_cases'])}
+
+    if text_data:
+        wc = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(text_data)
+        fig, ax = plt.subplots()
+        ax.imshow(wc, interpolation='bilinear')
+        ax.axis('off')
+        st.pyplot(fig)
+    else:
+        st.warning("No data available to generate a WordCloud. Try selecting different countries or dates.")
+
 
 # 7. Streamlit Native Charts
 with tabs[6]:
