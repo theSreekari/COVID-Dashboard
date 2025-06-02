@@ -92,13 +92,3 @@ with tabs[2]:
     ax.set_title("Total Cases Over Time (Matplotlib)")
     ax.legend()
     st.pyplot(fig)
-
-
-    # Normalize 
-    heatmap_data = heatmap_data.loc[countries]
-
-    fig, ax = plt.subplots(figsize=(12, len(countries)*0.5 + 2))
-    sns.heatmap(heatmap_data, cmap="YlOrRd", linewidths=0.1, ax=ax)
-    ax.set_title("Daily New COVID-19 Cases (Heatmap)")
-    st.pyplot(fig)
-
