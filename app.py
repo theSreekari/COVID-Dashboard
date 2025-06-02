@@ -93,18 +93,6 @@ with tabs[2]:
     ax.legend()
     st.pyplot(fig)
 
-#Heatmap 
-with tabs[3]:
-    st.write("### 🔥 Heatmap: Daily New Cases by Country and Date")
-    
-    # Prepare pivot table
-    heatmap_data = filtered_data.pivot_table(
-        index='location',
-        columns='date',
-        values='new_cases',
-        aggfunc='sum',
-        fill_value=0
-    )
 
     # Normalize 
     heatmap_data = heatmap_data.loc[countries]
