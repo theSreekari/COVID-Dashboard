@@ -1,14 +1,15 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 st.set_page_config(page_title="🌍 COVID-19 Dashboard", layout="wide")
 
 st.title("🦠 Global COVID-19 Data Analysis")
-st.markdown("Analyze worldwide COVID-19 trends with real-time visual insights.")
+st.markdown("Explore trends using Plotly, Seaborn, and Matplotlib")
 
-# Caching the data loading
-@st.cache_data(ttl=3600)  # cache for 1 hour
+@st.cache_data(ttl=3600)
 def load_data():
     url = "https://covid.ourworldindata.org/data/owid-covid-data.csv"
     df = pd.read_csv(url)
@@ -38,61 +39,78 @@ filtered_data = data[
     (data['date'] <= pd.to_datetime(end_date))
 ]
 
-# Download CSV
+# CSV Download
 st.sidebar.download_button(
-    label="⬇️ Download Filtered Data as CSV",
+    label="⬇️ Download Filtered CSV",
     data=filtered_data.to_csv(index=False).encode('utf-8'),
     file_name='filtered_covid_data.csv',
     mime='text/csv'
 )
 
-# Summary metrics
-st.subheader("🌐 Global Summary")
+# Summary
+st.subheader("📌 Global Summary")
 latest = data[data['date'] == data['date'].max()]
-
-st.write(f"📅 Data last updated: `{data['date'].max().date()}`")
-st.metric("🌍 Total Confirmed Cases", f"{int(data['total_cases'].sum()):,}")
-st.metric("💚 Estimated Recovered", f"{int(data['total_cases'].sum() - data['total_deaths'].sum()):,}")
+st.metric("🌍 Total Confirmed", f"{int(data['total_cases'].sum()):,}")
 st.metric("⚰️ Total Deaths", f"{int(data['total_deaths'].sum()):,}")
+st.metric("💚 Estimated Recoveries", f"{int(data['total_cases'].sum() - data['total_deaths'].sum()):,}")
 
-# Top 10 countries by confirmed cases
+# Top countries
 st.subheader("🏆 Top 10 Countries by Confirmed Cases")
 top_10 = latest.nlargest(10, 'total_cases')[['location', 'total_cases']]
 st.dataframe(top_10)
 
-# Visualizations
-st.subheader("📈 Case Trends Over Time")
+# Tabs for visualizations
+st.subheader("📊 Visualizations")
+tabs = st.tabs(["📈 Plotly", "📊 Seaborn", "🖼️ Matplotlib", "🔥 Heatmap"])
 
-tab1, tab2, tab3 = st.tabs(["🦠 Total Cases", "☠️ Total Deaths", "💚 Recovered"])
-
-with tab1:
+# Plotly
+with tabs[0]:
+    st.write("### Plotly: Total Cases Over Time")
     fig = px.line(
-        filtered_data,
-        x='date',
-        y='total_cases',
-        color='location',
+        filtered_data, 
+        x='date', y='total_cases', 
+        color='location', 
         title="Total Cases Over Time"
     )
     st.plotly_chart(fig, use_container_width=True)
 
-with tab2:
-    fig2 = px.line(
-        filtered_data,
-        x='date',
-        y='total_deaths',
-        color='location',
-        title="Total Deaths Over Time"
-    )
-    st.plotly_chart(fig2, use_container_width=True)
+# Seaborn 
+with tabs[1]:
+    st.write("### Seaborn: Total Cases Over Time")
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.lineplot(data=filtered_data, x='date', y='total_cases', hue='location', ax=ax)
+    ax.set_title("Total Cases Over Time (Seaborn)")
+    st.pyplot(fig)
 
-with tab3:
-    # Estimate recovered cases as total - deaths
-    filtered_data['estimated_recovered'] = filtered_data['total_cases'] - filtered_data['total_deaths']
-    fig3 = px.line(
-        filtered_data,
-        x='date',
-        y='estimated_recovered',
-        color='location',
-        title="Estimated Recoveries Over Time"
+# Matplotlib
+with tabs[2]:
+    st.write("### Matplotlib: Total Cases Over Time")
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for country in countries:
+        country_data = filtered_data[filtered_data['location'] == country]
+        ax.plot(country_data['date'], country_data['total_cases'], label=country)
+    ax.set_title("Total Cases Over Time (Matplotlib)")
+    ax.legend()
+    st.pyplot(fig)
+
+#Heatmap 
+with tabs[3]:
+    st.write("### 🔥 Heatmap: Daily New Cases by Country and Date")
+    
+    # Prepare pivot table
+    heatmap_data = filtered_data.pivot_table(
+        index='location',
+        columns='date',
+        values='new_cases',
+        aggfunc='sum',
+        fill_value=0
     )
-    st.plotly_chart(fig3, use_container_width=True)
+
+    # Normalize 
+    heatmap_data = heatmap_data.loc[countries]
+
+    fig, ax = plt.subplots(figsize=(12, len(countries)*0.5 + 2))
+    sns.heatmap(heatmap_data, cmap="YlOrRd", linewidths=0.1, ax=ax)
+    ax.set_title("Daily New COVID-19 Cases (Heatmap)")
+    st.pyplot(fig)
+
