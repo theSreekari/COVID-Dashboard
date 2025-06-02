@@ -3,8 +3,6 @@ import pandas as pd
 import plotly.express as px
 import matplotlib.pyplot as plt
 import seaborn as sns
-from wordcloud import WordCloud
-import io
 
 st.set_page_config(page_title="🌍 COVID-19 Dashboard", layout="wide")
 
@@ -55,7 +53,7 @@ st.metric("💚 Recoveries (est)", f"{int(data['total_cases'].sum() - data['tota
 # Tabs
 tabs = st.tabs([
     "📈 Plotly Line", "📊 Pie Chart", "🏅 Top 10 Bar", "📉 Seaborn Area",
-    "📚 Matplotlib Compare", "☁️ WordCloud", "📊 Streamlit Charts"
+    "📚 Matplotlib Compare", "📊 Streamlit Charts"
 ])
 
 # 1. Plotly Line
@@ -100,24 +98,8 @@ with tabs[4]:
     ax.legend()
     st.pyplot(fig)
 
-# 6. WordCloud
+# 6. Streamlit Native Charts
 with tabs[5]:
-    st.write("### ☁️ WordCloud: Total Cases by Country Name Size")
-    word_data = latest[latest['location'].isin(countries)]
-    text_data = {row['location']: row['total_cases'] for _, row in word_data.iterrows() if pd.notna(row['total_cases'])}
-
-    if text_data:
-        wc = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(text_data)
-        fig, ax = plt.subplots()
-        ax.imshow(wc, interpolation='bilinear')
-        ax.axis('off')
-        st.pyplot(fig)
-    else:
-        st.warning("No data available to generate a WordCloud. Try selecting different countries or dates.")
-
-
-# 7. Streamlit Native Charts
-with tabs[6]:
     st.write("### 📊 Streamlit Native Charts")
     pivot_data = filtered_data.pivot_table(index='date', columns='location', values='total_cases')
     st.line_chart(pivot_data)
