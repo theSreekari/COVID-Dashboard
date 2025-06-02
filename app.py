@@ -7,7 +7,7 @@ import seaborn as sns
 st.set_page_config(page_title="🌍 COVID-19 Dashboard", layout="wide")
 
 st.title("🦠 Global COVID-19 Data Analysis")
-st.markdown("Explore trends using Plotly, Seaborn, and Matplotlib")
+st.markdown("Explore trends using Plotly, Seaborn, and Matplotlib (with Pie Charts)")
 
 @st.cache_data(ttl=3600)
 def load_data():
@@ -61,9 +61,9 @@ st.dataframe(top_10)
 
 # Tabs for visualizations
 st.subheader("📊 Visualizations")
-tabs = st.tabs(["📈 Plotly", "📊 Seaborn", "🖼️ Matplotlib"])
+tabs = st.tabs(["📈 Plotly Line", "📊 Pie Chart", "📉 Seaborn", "🖼️ Matplotlib"])
 
-# Plotly
+# ========== Plotly Line Chart ==========
 with tabs[0]:
     st.write("### Plotly: Total Cases Over Time")
     fig = px.line(
@@ -74,16 +74,28 @@ with tabs[0]:
     )
     st.plotly_chart(fig, use_container_width=True)
 
-# Seaborn 
+# ========== Pie Chart ==========
 with tabs[1]:
+    st.write("### 📊 Pie Chart: Total Cases by Country")
+    pie_data = filtered_data.groupby("location")["total_cases"].max().reset_index()
+    fig = px.pie(
+        pie_data,
+        names='location',
+        values='total_cases',
+        title='Proportion of Total Cases by Country'
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+# ========== Seaborn ==========
+with tabs[2]:
     st.write("### Seaborn: Total Cases Over Time")
     fig, ax = plt.subplots(figsize=(10, 5))
     sns.lineplot(data=filtered_data, x='date', y='total_cases', hue='location', ax=ax)
     ax.set_title("Total Cases Over Time (Seaborn)")
     st.pyplot(fig)
 
-# Matplotlib
-with tabs[2]:
+# ========== Matplotlib ==========
+with tabs[3]:
     st.write("### Matplotlib: Total Cases Over Time")
     fig, ax = plt.subplots(figsize=(10, 5))
     for country in countries:
