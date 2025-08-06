@@ -11,7 +11,7 @@ st.markdown("Explore global COVID-19 trends with rich visualizations")
 
 @st.cache_data(ttl=3600)
 def load_data():
-    df = pd.read_csv("data/owid-covid-data.csv")
+    df = pd.read_csv("owid-covid-data.csv")
     df['date'] = pd.to_datetime(df['date'])
     return df
 
